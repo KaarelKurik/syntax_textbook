@@ -2,10 +2,18 @@
 
 This is the source for the syntax textbook. Chapters are written in Markdown in `src/chapters/`, and `build.mjs` turns them into static HTML in `dist/`.
 
-## Building
+## Previewing while you write
 
     npm install --no-bin-links   # --no-bin-links is only needed on the shared project folder
-    npm run build
+    npm run dev
+
+Open http://localhost:8000. The book rebuilds every time you save a file in `src/` and the open page reloads by itself.
+The preview includes `todo` blocks; the published book does not.
+
+## Building
+
+    npm run build            # what GitHub Pages publishes; todo blocks are left out
+    node build.mjs --drafts  # the same, with todo blocks shown
 
 To read the book, serve the folder (`python3 -m http.server -d dist`) and open `index.html`. Pages with widgets load ES modules, and those won't run if you open the files directly.
 
@@ -21,6 +29,7 @@ Name each file `NN-short-name.md`. The number is the chapter number, and the fir
 | `::: exercise label "name" needs="calculus"` | The same block with a small "uses calculus" badge, for material that relies on knowledge beyond the book's baseline. |
 | `[[label]]` | A link that reads "Definition 1.1", "Section 1.2" and so on. `[[ch-2]]` links to a chapter. |
 | `[[label\|custom text]]` | A link with your own wording. |
+| `::: todo` … `:::` | A note about work still to do, such as a widget or exercise you want built. It shows as a red box in the preview, is left out of the published book, and every build lists the open todos with their file and line. Text after `todo` on the first line becomes part of the note. |
 | `::: widget tree expr="x^2 + 1"` … `:::` | An interactive widget. The block's body becomes the note under it. |
 
 There are two widgets so far: `tree` (attribute `expr`) and `subst` (attributes `expr`, `var` and `by`). They live in `src/assets/widgets.js` and share the expression library in `src/assets/expr.js`.

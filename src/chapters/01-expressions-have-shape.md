@@ -8,6 +8,10 @@ Three of these expressions mean the same thing, and one does not. Which is the o
 $$2 + 3 \cdot 4, \qquad 2 + (3 \cdot 4), \qquad (2 + 3) \cdot 4, \qquad 3 \cdot 4 + 2$$
 :::
 
+::: todo
+Replace this single puzzle with a short sequence that leads up to the idea of a tree.
+:::
+
 Every expression you write has a hidden shape. The symbols sit in a row on the page, but what they mean is
 a tree: one operation on top, whose inputs are themselves expressions.
 

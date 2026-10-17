@@ -6,6 +6,9 @@
 //   [[syntax-tree]] / [[syntax-tree|syntax trees]] cross-reference to any label
 //   ## Heading {#label}            numbered section, referable like any other label
 //   ::: widget tree expr="x^2"     interactive widget, mounted by assets/widgets.js
+//   ::: todo                       note for later work; shown only with --drafts, always listed by the build
+//
+// Usage: node build.mjs [--drafts]
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,6 +20,7 @@ const ROOT = path.dirname(new URL(import.meta.url).pathname);
 const SRC = path.join(ROOT, 'src');
 const DIST = path.join(ROOT, 'dist');
 const BOOK_TITLE = 'Reading and Rewriting Mathematics';
+const DRAFTS = process.argv.includes('--drafts');
 
 const KINDS = { definition: 'Definition', example: 'Example', exercise: 'Exercise', puzzle: 'Puzzle', remark: 'Remark' };
 
@@ -40,14 +44,21 @@ const chapters = fs.readdirSync(path.join(SRC, 'chapters'))
 
 const labels = new Map(); // label -> { href, text, name }
 const errors = [];
+const todos = []; // { where, text }
 
 for (const ch of chapters) {
   ch.sections = [];
   const counters = {};
   let sec = 0;
-  for (const line of ch.src.split('\n')) {
+  const lines = ch.src.split('\n');
+  lines.forEach((line, i) => {
     let m;
-    if ((m = line.match(/^## (.+?)(?:\s*\{#([\w-]+)\})?\s*$/))) {
+    if (/^::: todo\b/.test(line)) {
+      const body = [];
+      for (let j = i + 1; j < lines.length && !/^:::\s*$/.test(lines[j]); j++) body.push(lines[j].trim());
+      const text = [line.replace(/^::: todo\s*/, ''), ...body].filter(Boolean).join(' ');
+      todos.push({ where: `src/chapters/${ch.file}:${i + 1}`, text });
+    } else if ((m = line.match(/^## (.+?)(?:\s*\{#([\w-]+)\})?\s*$/))) {
       sec++;
       const id = m[2] || slug(m[1]);
       const entry = { href: `${ch.out}#${id}`, text: `Section ${ch.num}.${sec}`, name: m[1] };
@@ -57,7 +68,7 @@ for (const ch of chapters) {
       counters[m[1]] = (counters[m[1]] || 0) + 1;
       addLabel(m[2], { href: `${ch.out}#${m[2]}`, text: `${KINDS[m[1]]} ${ch.num}.${counters[m[1]]}` }, ch);
     }
-  }
+  });
   labels.set(`ch-${ch.num}`, { href: ch.out, text: `Chapter ${ch.num}` });
 }
 
@@ -97,6 +108,17 @@ function makeRenderer(ch) {
       },
     });
   }
+
+  md.use(container, 'todo', {
+    validate: (params) => /^todo\b/.test(params.trim()),
+    render(tokens, idx) {
+      // Without --drafts the todo is wrapped in a marker that renderChapter strips out entirely.
+      if (!DRAFTS) return tokens[idx].nesting === 1 ? '<template class="todo">' : '</template>\n';
+      if (tokens[idx].nesting !== 1) return '</div>\n';
+      const inline = tokens[idx].info.trim().replace(/^todo\s*/, '');
+      return `<div class="block todo"><span class="block-head"><b>To do</b>${inline ? ` ${md.renderInline(inline)}` : ''}</span>\n`;
+    },
+  });
 
   md.use(container, 'widget', {
     validate: (params) => /^widget\s+\w+/.test(params.trim()),
@@ -147,6 +169,7 @@ function renderChapter(ch) {
 
   let html = makeRenderer(ch).render(src);
   html = html.replace(/<p>(@@HOLD\d+@@)<\/p>/g, '$1');
+  html = html.replace(/<template class="todo">[\s\S]*?<\/template>\n?/g, '');
   return html.replace(/@@HOLD(\d+)@@/g, (_, i) => stash[+i]);
 }
 
@@ -203,5 +226,6 @@ fs.writeFileSync(path.join(DIST, 'index.html'), page({
   body: `<h1>${BOOK_TITLE}</h1>\n<p class="sub">A book about the grammar of mathematical notation.</p>\n<ol class="toc">\n${toc}\n</ol>`,
 }));
 
+if (todos.length) console.log(`${todos.length} open todo(s):\n${todos.map((t) => `  ${t.where}  ${t.text}`).join('\n')}`);
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }
 console.log(`Built ${chapters.length} chapter(s) into dist/${errors.length ? ` with ${errors.length} problem(s)` : ''}.`);
