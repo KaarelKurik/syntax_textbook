@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "dev": "node dev.mjs"
   },
   "dependencies": {
     "katex": "0.16.9",

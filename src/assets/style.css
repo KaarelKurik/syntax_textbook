@@ -44,6 +44,8 @@ h2 { font-size: 1.25rem; margin-top: 2.5rem; }
 .pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; padding-top: 1rem;
          border-top: 1px solid var(--rule); font: 15px system-ui, sans-serif; }
 .bad-ref, .math-error { color: #c0392b; }
+.todo { border-left: 3px dashed #c0392b; background: color-mix(in srgb, #c0392b 8%, transparent); padding-right: .8rem; font-family: system-ui, sans-serif; font-size: 15px; }
+.todo .block-head b { font-variant: normal; color: #c0392b; }
 
 /* widgets */
 .widget { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; margin: 1.5rem 0;
