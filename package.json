@@ -1,0 +1,13 @@
+{
+  "name": "syntax-textbook",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "katex": "0.16.9",
+    "markdown-it": "14.1.0",
+    "markdown-it-container": "4.0.0"
+  }
+}

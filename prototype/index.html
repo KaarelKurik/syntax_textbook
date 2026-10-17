@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Syntax Prototype</title>
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+<script defer src="vendor/katex/contrib/auto-render.min.js"></script>
+<style>
+  :root {
+    --bg: #fbfaf7; --fg: #1d1d1f; --muted: #6b6b70; --rule: #dedbd2;
+    --panel: #f2efe8; --accent: #2f6fb3; --hl: #ffe08a; --graft: #c9e7c9; --bad: #f6c9c4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17171a; --fg: #e8e6e1; --muted: #9a9890; --rule: #33332f;
+      --panel: #222226; --accent: #7fb0e6; --hl: #6b5a1e; --graft: #24502a; --bad: #5c2a25;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17171a; --fg: #e8e6e1; --muted: #9a9890; --rule: #33332f;
+    --panel: #222226; --accent: #7fb0e6; --hl: #6b5a1e; --graft: #24502a; --bad: #5c2a25;
+  }
+  html { background: var(--bg); }
+  body { margin: 0 auto; max-width: 42rem; padding: 2rem 16px 4rem; background: var(--bg); color: var(--fg);
+         font: 18px/1.6 Georgia, "Iowan Old Style", serif; }
+  h1 { font-size: 1.7rem; margin-bottom: .2rem; } h2 { font-size: 1.25rem; margin-top: 2.5rem; }
+  .sub { color: var(--muted); margin-top: 0; }
+  a { color: var(--accent); }
+  .defn { border-left: 3px solid var(--accent); padding: .3rem 0 .3rem 1rem; margin: 1.5rem 0; }
+  .defn b { font-variant: small-caps; }
+  .widget { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; margin: 1.5rem 0;
+            font-family: system-ui, sans-serif; font-size: 15px; }
+  .widget label { color: var(--muted); display: block; margin-bottom: .3rem; }
+  .widget input { font: 16px ui-monospace, monospace; width: 100%; box-sizing: border-box; padding: .4rem .5rem;
+                  border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--fg); }
+  .row { display: flex; gap: .75rem; flex-wrap: wrap; } .row > div { flex: 1 1 12rem; }
+  .render { font-size: 1.25rem; min-height: 2.2rem; margin: .8rem 0 .4rem; overflow-x: auto; }
+  .err { color: #c0392b; font-size: 14px; min-height: 1.2rem; }
+  svg.tree { width: 100%; height: auto; display: block; }
+  svg.tree line { stroke: var(--muted); stroke-width: 1.2; }
+  svg.tree circle { fill: var(--bg); stroke: var(--fg); stroke-width: 1.2; cursor: pointer; }
+  svg.tree g.on circle { fill: var(--hl); }
+  svg.tree g.graft circle { fill: var(--graft); }
+  svg.tree text { fill: var(--fg); font: 14px ui-monospace, monospace; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .hl { background: var(--hl); border-radius: 3px; }
+  .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: .8rem; }
+  @media (max-width: 520px) { .cmp { grid-template-columns: 1fr; } }
+  .cmp > div { background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: .6rem; }
+  .cmp .tag { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .cmp .bad { background: var(--bad); }
+  .hint { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Prototype: two widgets</h1>
+<p class="sub">A test page for the HTML approach, not a chapter.</p>
+
+<p>Every expression you write has a hidden shape. The symbols sit in a row on the page, but the meaning is a
+tree: one operation on top, whose inputs are themselves expressions.</p>
+
+<div class="defn" id="def-tree">
+<b>Definition 1.1</b> (syntax tree). The <em>syntax tree</em> of an expression has the expression's last
+operation at its root, and the syntax trees of that operation's inputs as its children.
+</div>
+
+<div class="widget" id="w-tree">
+  <label for="tree-in">Type an expression. Click a node to see which part of the expression it stands for.</label>
+  <input id="tree-in" value="3x^2 + sin(2x) / (x - 1)" spellcheck="false" autocomplete="off">
+  <div class="err"></div>
+  <div class="render"></div>
+  <svg class="tree"></svg>
+  <p class="hint">Try <code>-x^2</code> versus <code>(-x)^2</code>, or <code>a/b/c</code>, or <code>sin x^2</code>.</p>
+</div>
+
+<h2 id="sec-subst">Substitution</h2>
+<p>To substitute an expression for a variable, you replace every occurrence of the variable by a copy of the
+expression. In terms of <a href="#def-tree">syntax trees</a>, each leaf labelled with the variable gets the whole
+tree of the new expression grafted on in its place. Substituting the <em>letters</em>, rather than the tree, is a
+common source of mistakes.</p>
+
+<div class="widget" id="w-subst">
+  <div class="row">
+    <div><label for="s-expr">Expression</label><input id="s-expr" value="x^2 - 2x" spellcheck="false" autocomplete="off"></div>
+    <div><label for="s-var">Replace the variable</label><input id="s-var" value="x" maxlength="1" spellcheck="false" autocomplete="off"></div>
+    <div><label for="s-by">with</label><input id="s-by" value="a + 1" spellcheck="false" autocomplete="off"></div>
+  </div>
+  <div class="err"></div>
+  <div class="cmp">
+    <div class="naive"><div class="tag">Replacing letters</div><div class="render"></div></div>
+    <div><div class="tag">Grafting trees</div><div class="render"></div></div>
+  </div>
+  <svg class="tree"></svg>
+  <p class="hint">Green nodes are the grafted copies. The left box turns red when copying the letters changes the meaning.</p>
+</div>
+
+<script type="module">
+import { parse, toTeX, substitute, layout, label, children } from './expr.js';
+
+const tex = (el, s) => katex.render(s, el, { throwOnError: false, trust: true, strict: false });
+
+function drawTree(svg, root, { selected, onPick } = {}) {
+  const { nodes, width, depth } = layout(root);
+  const dx = 46, dy = 56, pad = 24;
+  const W = Math.max(width, 1) * dx + pad, H = depth * dy;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.style.maxWidth = `${W * 1.1}px`;
+  const px = (r) => pad / 2 + dx / 2 + r.x * dx, py = (r) => dy / 2 + r.depth * dy - 4;
+  let out = '';
+  for (const r of nodes) if (r.parent) out += `<line x1="${px(r.parent)}" y1="${py(r.parent)}" x2="${px(r)}" y2="${py(r)}"/>`;
+  nodes.forEach((r, i) => {
+    const cls = [r.n === selected ? 'on' : '', r.n.grafted || r.inGraft ? 'graft' : ''].join(' ');
+    out += `<g class="${cls}" data-i="${i}"><circle cx="${px(r)}" cy="${py(r)}" r="16"/><text x="${px(r)}" y="${py(r)}">${label(r.n)}</text></g>`;
+  });
+  svg.innerHTML = out;
+  if (onPick) svg.querySelectorAll('g').forEach((g) => g.addEventListener('click', () => onPick(nodes[+g.dataset.i].n)));
+}
+
+// Widget 1: tree explorer
+{
+  const w = document.getElementById('w-tree');
+  const input = w.querySelector('input'), err = w.querySelector('.err'), out = w.querySelector('.render'), svg = w.querySelector('svg');
+  let ast = null, sel = null;
+  const show = () => {
+    tex(out, toTeX(ast, (n) => n === sel));
+    drawTree(svg, ast, { selected: sel, onPick: (n) => { sel = n === sel ? null : n; show(); } });
+  };
+  const update = () => {
+    try { ast = parse(input.value); sel = null; err.textContent = ''; show(); }
+    catch (e) { err.textContent = e.message; }
+  };
+  input.addEventListener('input', update);
+  window.addEventListener('load', update);
+}
+
+// Widget 2: substitution, letters versus trees
+{
+  const w = document.getElementById('w-subst');
+  const [e, v, b] = w.querySelectorAll('input');
+  const err = w.querySelector('.err'), [naiveOut, graftOut] = w.querySelectorAll('.render');
+  const naiveBox = w.querySelector('.naive'), svg = w.querySelector('svg');
+  const same = (p, q) => JSON.stringify(strip(p)) === JSON.stringify(strip(q));
+  const strip = (n) => ({ ...n, grafted: undefined, a: n.a && strip(n.a), b: n.b && strip(n.b) });
+  const markGraft = (n, inside = false) => { const g = inside || n.grafted; children(n).forEach((c) => markGraft(c, g)); n.inGraft = g; return n; };
+  const update = () => {
+    try {
+      const ast = parse(e.value), by = parse(b.value), name = v.value.trim();
+      if (!/^[a-z]$/i.test(name)) throw new Error('the variable should be a single letter');
+      const good = markGraft(substitute(ast, name, by));
+      const naiveSrc = e.value.split(name).join(b.value);
+      const naive = parse(naiveSrc);
+      err.textContent = '';
+      tex(naiveOut, toTeX(naive));
+      tex(graftOut, toTeX(good, (n) => n.grafted));
+      naiveBox.classList.toggle('bad', !same(naive, good));
+      const nodes = []; (function collect(n) { nodes.push(n); children(n).forEach(collect); })(good);
+      drawTree(svg, good);
+      // layout() copies node references, so graft colouring reads n.grafted / n.inGraft directly
+      svg.querySelectorAll('g').forEach((g, i) => { if (nodes[i].inGraft) g.classList.add('graft'); });
+    } catch (x) { err.textContent = x.message; }
+  };
+  [e, v, b].forEach((el) => el.addEventListener('input', update));
+  window.addEventListener('load', update);
+}
+
+window.addEventListener('load', () => renderMathInElement(document.body, { delimiters: [{ left: '\\(', right: '\\)', display: false }] }));
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+:root {
+  --bg: #fbfaf7; --fg: #1d1d1f; --muted: #6b6b70; --rule: #dedbd2;
+  --panel: #f2efe8; --accent: #2f6fb3; --hl: #ffe08a; --graft: #c9e7c9; --bad: #f6c9c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17171a; --fg: #e8e6e1; --muted: #9a9890; --rule: #33332f;
+    --panel: #222226; --accent: #7fb0e6; --hl: #6b5a1e; --graft: #24502a; --bad: #5c2a25;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17171a; --fg: #e8e6e1; --muted: #9a9890; --rule: #33332f;
+  --panel: #222226; --accent: #7fb0e6; --hl: #6b5a1e; --graft: #24502a; --bad: #5c2a25;
+}
+
+html { background: var(--bg); }
+body { margin: 0 auto; max-width: 42rem; padding: 1rem 16px 4rem; background: var(--bg); color: var(--fg);
+       font: 18px/1.6 Georgia, "Iowan Old Style", serif; }
+a { color: var(--accent); }
+h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.5rem 0 1rem; }
+h2 { font-size: 1.25rem; margin-top: 2.5rem; }
+.chnum { display: block; font-size: .9rem; font-weight: normal; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.secnum { color: var(--muted); font-weight: normal; margin-right: .35em; }
+.sub { color: var(--muted); margin-top: 0; }
+.bookbar { font: 14px system-ui, sans-serif; min-height: 1.2rem; }
+.bookbar a { color: var(--muted); text-decoration: none; }
+.katex-display { overflow-x: auto; overflow-y: hidden; }
+
+/* numbered blocks */
+.block { margin: 1.5rem 0; padding: .3rem 0 .3rem 1rem; border-left: 3px solid var(--rule); }
+.block > p:first-of-type { display: inline; }
+.block-head { margin-right: .3em; }
+.block-head b { font-variant: small-caps; }
+.definition { border-left-color: var(--accent); }
+.puzzle, .exercise { border-left-color: #c08a2d; }
+:target { background: color-mix(in srgb, var(--hl) 35%, transparent); }
+
+/* table of contents and pager */
+.toc { padding-left: 0; list-style: none; }
+.toc > li { margin: 1rem 0; font-size: 1.1rem; }
+.toc .chnum { display: inline; margin-right: .4em; }
+.toc a { text-decoration: none; }
+.toc ol { list-style: none; padding-left: 1.6rem; font-size: 1rem; }
+.pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; padding-top: 1rem;
+         border-top: 1px solid var(--rule); font: 15px system-ui, sans-serif; }
+.bad-ref, .math-error { color: #c0392b; }
+
+/* widgets */
+.widget { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 1rem; margin: 1.5rem 0;
+          font-family: system-ui, sans-serif; font-size: 15px; }
+.widget label { color: var(--muted); display: block; margin-bottom: .3rem; }
+.widget input { font: 16px ui-monospace, monospace; width: 100%; box-sizing: border-box; padding: .4rem .5rem;
+                border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--fg); }
+.widget-note { color: var(--muted); font-size: 13px; }
+.widget-note p { margin: .5rem 0 0; }
+.row { display: flex; gap: .75rem; flex-wrap: wrap; } .row > div { flex: 1 1 10rem; }
+.render { font-size: 1.25rem; min-height: 2.2rem; margin: .8rem 0 .4rem; overflow-x: auto; }
+.err { color: #c0392b; font-size: 14px; min-height: 1.2rem; }
+svg.tree { width: 100%; height: auto; display: block; }
+svg.tree line { stroke: var(--muted); stroke-width: 1.2; }
+svg.tree circle { fill: var(--bg); stroke: var(--fg); stroke-width: 1.2; cursor: pointer; }
+svg.tree g.on circle { fill: var(--hl); }
+svg.tree g.graft circle { fill: var(--graft); }
+svg.tree text { fill: var(--fg); font: 14px ui-monospace, monospace; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.hl { background: var(--hl); border-radius: 3px; }
+.cmp { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: .8rem; }
+@media (max-width: 520px) { .cmp { grid-template-columns: 1fr; } }
+.cmp > div { background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: .6rem; }
+.cmp .tag { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.cmp .bad { background: var(--bad); }
+.needs { font: 12px system-ui, sans-serif; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 0 .5em; margin-left: .3em; white-space: nowrap; }
